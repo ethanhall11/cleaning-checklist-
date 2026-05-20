@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cleaning">
+<meta name="theme-color" content="#5a7a5e">
+<title>Ethan's Cleaning Checklist</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --cream: #f5f1e8;
+    --paper: #fbf8f1;
+    --ink: #1f2a24;
+    --muted: #6b7569;
+    --sage: #5a7a5e;
+    --sage-light: #c5d4be;
+    --sage-soft: #e3ebdd;
+    --terracotta: #b86b4a;
+    --terracotta-soft: #f0d9cc;
+    --line: #d8d2c2;
+  }
+  html, body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    -webkit-text-size-adjust: 100%;
+    min-height: 100vh;
+  }
+  body {
+    padding: 12px;
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 20px 18px;
+  }
+  .header {
+    text-align: center;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+  }
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--sage);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  h1 em { font-style: italic; color: var(--sage); }
+  .controls {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+  input.month-input {
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    font-size: 13px;
+    background: white;
+    color: var(--ink);
+    border-radius: 2px;
+    width: 160px;
+    font-family: inherit;
+    -webkit-appearance: none;
+  }
+  input.month-input:focus { outline: 2px solid var(--sage); outline-offset: -1px; }
+  button.btn {
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    padding: 9px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    font-family: inherit;
+  }
+  button.btn:active { opacity: 0.85; }
+  button.btn-secondary {
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .month-total {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .reset-confirm {
+    background: var(--terracotta-soft);
+    border: 1px solid var(--terracotta);
+    padding: 14px;
+    margin-bottom: 14px;
+    border-radius: 2px;
+    display: none;
+  }
+  .reset-confirm.active { display: block; }
+  .reset-confirm p {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 4px;
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 2px;
+    text-align: center;
+    line-height: 1.2;
+    font-family: inherit;
+  }
+  .tab.active {
+    background: var(--sage);
+    color: white;
+    border-color: var(--sage);
+  }
+  .tab .pct {
+    font-size: 10px;
+    opacity: 0.85;
+    margin-top: 2px;
+    font-weight: 400;
+    display: block;
+  }
+  .progress-row {
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .progress-text {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .progress-bar {
+    height: 6px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--sage);
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  .day-card {
+    background: var(--sage-soft);
+    border: 1px solid var(--sage);
+    padding: 14px;
+    margin-bottom: 10px;
+    border-radius: 2px;
+  }
+  .day-card-header {
+    border-bottom: 1px solid var(--sage);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .day-name {
+    font-family: Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .day-time {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sage);
+    font-weight: 700;
+  }
+  .section { margin-bottom: 14px; }
+  .section:last-child { margin-bottom: 0; }
+  .section-title {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sage);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .task {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 0;
+    cursor: pointer;
+    min-height: 32px;
+    user-select: none;
+  }
+  .task input[type="checkbox"] {
+    margin-top: 3px;
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--sage);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .task .label {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.4;
+    transition: opacity 0.15s ease;
+  }
+  .task input[type="checkbox"]:checked + .label {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+  .deep-section {
+    border-top: 1px dashed var(--terracotta);
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+  .deep-tag {
+    display: inline-block;
+    background: var(--terracotta);
+    color: white;
+    padding: 4px 8px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+    border-radius: 2px;
+  }
+  .deep-section .task input[type="checkbox"] { accent-color: var(--terracotta); }
+  .deep-section .task .label { font-weight: 500; }
+  .off-days {
+    background: var(--paper);
+    border: 1px dashed var(--line);
+    padding: 12px;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    border-radius: 2px;
+    font-style: italic;
+  }
+  .off-days strong { color: var(--ink); font-style: normal; }
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="eyebrow">Monthly Checklist</div>
+    <h1><em>Ethan's</em> Professional Cleaning Service</h1>
+    <div class="controls">
+      <input type="text" class="month-input" id="monthInput" placeholder="Month & Year">
+      <button class="btn" id="resetBtn">Reset for New Month</button>
+    </div>
+    <div class="month-total" id="monthTotal">Month total: 0 of 0 (0%)</div>
+  </div>
+  <div class="reset-confirm" id="resetConfirm">
+    <p>Reset all checkboxes for a new month? This cannot be undone.</p>
+    <button class="btn" id="confirmReset" style="margin-right: 8px;">Yes, Reset</button>
+    <button class="btn btn-secondary" id="cancelReset">Cancel</button>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="progress-row">
+    <div class="progress-text" id="progressText">Week 1 progress: 0 of 0 tasks (0%)</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+  <div id="weekContent"></div>
+  <div class="off-days">
+    <strong>Saturday</strong> – Off &nbsp;·&nbsp; <strong>Sunday</strong> – Buffer / Catch-up
+  </div>
+  <div class="footer">
+    Your progress saves automatically on this device. Tap "Reset for New Month" at the start of each month.
+  </div>
+</div>
+<script>
+const DAILY_TASKS = {
+  monday: {
+    name: 'Monday',
+    time: '10:00 – 11:15',
+    sections: [
+      { name: "Kids' Bathroom", tasks: ['Showers','Mirrors','Glass Shelves','Counter','Appliances / Fixtures','Door Frame & Light Switch','Toilet','Trash (weekly)','Floors – vacuum, then mop'] },
+      { name: 'Master Bedroom Bathroom', tasks: ['Shower','Mirror & Counters','Appliances / Fixtures','Toilet','Trash (weekly)','Floors – vacuum, then mop'] }
+    ]
+  },
+  tuesday: {
+    name: 'Tuesday',
+    time: '12:30 – 13:45',
+    sections: [
+      { name: 'Kitchen', tasks: ['Cabinets & Drawers (wipe down)','Appliance Exteriors','Counters, Tables & Backsplash','Back Wall Glass','Sink & Faucet','Alexa Screen','Juice Container','Cords (tuck behind microwave)','Door Frame, Walls & Light Switch','Trash','Floors – vacuum, then mop'] }
+    ]
+  },
+  wednesday: {
+    name: 'Wednesday',
+    time: '10:00 – 11:30',
+    sections: [
+      { name: 'Master Bedroom', tasks: ['Dusting (furniture, headboard, fan)','Mirrors & Doors','Wipe-Down (furniture, tables)','Trash (weekly)','Floors – vacuum'] },
+      { name: "Girls' Bedroom", tasks: ['Dusting (furniture, headboard, fan)','Mirrors','Windows','Walls, Doors & Light Switches','Tables','Dresser','Floors – vacuum'] },
+      { name: 'Stairs', tasks: ['Banister','Walls','Stairs – vacuum'] }
+    ]
+  },
+  thursday: {
+    name: 'Thursday',
+    time: '10:00 – 11:00',
+    sections: [
+      { name: 'Hallway & Entryway', tasks: ['Mirror','Light Switches & Front Door','Shoe Rack','Floors – vacuum'] },
+      { name: 'Terrace', tasks: ['Pet Cleanup','Weed Picking','Table','Trash','Sweeping','Hose Down'] }
+    ]
+  },
+  friday: {
+    name: 'Friday',
+    time: '11:30 – 12:45',
+    sections: [
+      { name: 'Upstairs – Living Area', tasks: ['Dusting (furniture, fan)','Cabinets & Shelves','Tables','Windows & Doors','TV (glass cleaner on cloth)','Light Switches','Couch (clear, vacuum cushions)','Trash (weekly)','Floors – vacuum'] }
+    ]
+  }
+};
+const DEEP_CLEANS = {
+  1: { tuesday: { name: 'Kitchen Deep', tasks: ['Empty fridge, wipe inside','Reorganize fridge bottles (big in back, small in front)','Wipe inside of oven','Rinse oven with damp towel (repeat until clean)','Dry oven with clean towel','Wipe inside of microwave'] } },
+  2: {
+    wednesday: { name: 'Floor Reset (Part 1)', tasks: ['Mop bedroom floors','Mop stairs'] },
+    thursday: { name: 'Floor Reset (Part 2)', tasks: ['Mop hallway / entryway floor'] }
+  },
+  3: { friday: { name: 'Living Area Deep', tasks: ['Move couch to vacuum behind / underneath','Mop floors'] } },
+  4: { tuesday: { name: 'Cabinet Reset', tasks: ['Empty kitchen cabinets','Empty kitchen drawers','Vacuum out crumbs and debris','Wipe down interiors'] } }
+};
+const DAY_ORDER = ['monday','tuesday','wednesday','thursday','friday'];
+const STORAGE_KEY = 'ethans-cleaning-checklist-v1';
+let state = { checked: {}, monthYear: '' };
+let activeWeek = 1;
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state.checked = parsed.checked || {};
+      state.monthYear = parsed.monthYear || '';
+    }
+  } catch (e) { console.warn('Failed to load state', e); }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { console.warn('Failed to save state', e); }
+}
+function taskId(week, day, sIdx, tIdx) { return `w${week}-${day}-s${sIdx}-t${tIdx}`; }
+function deepTaskId(week, day, tIdx) { return `w${week}-${day}-deep-${tIdx}`; }
+function weekProgress(week) {
+  let total = 0, done = 0;
+  DAY_ORDER.forEach(day => {
+    DAILY_TASKS[day].sections.forEach((section, sIdx) => {
+      section.tasks.forEach((_, tIdx) => {
+        total++;
+        if (state.checked[taskId(week, day, sIdx, tIdx)]) done++;
+      });
+    });
+    const deep = DEEP_CLEANS[week] && DEEP_CLEANS[week][day];
+    if (deep) {
+      deep.tasks.forEach((_, tIdx) => {
+        total++;
+        if (state.checked[deepTaskId(week, day, tIdx)]) done++;
+      });
+    }
+  });
+  return { total, done, pct: total ? Math.round((done/total)*100) : 0 };
+}
+function monthProgress() {
+  let total = 0, done = 0;
+  for (let w = 1; w <= 4; w++) {
+    const p = weekProgress(w);
+    total += p.total;
+    done += p.done;
+  }
+  return { total, done, pct: total ? Math.round((done/total)*100) : 0 };
+}
+function renderTabs() {
+  const container = document.getElementById('tabs');
+  container.innerHTML = '';
+  for (let w = 1; w <= 4; w++) {
+    const p = weekProgress(w);
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (w === activeWeek ? ' active' : '');
+    btn.innerHTML = `Week ${w}<span class="pct">${p.pct}%</span>`;
+    btn.addEventListener('click', () => {
+      activeWeek = w;
+      renderAll();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    container.appendChild(btn);
+  }
+}
+function renderProgressBar() {
+  const p = weekProgress(activeWeek);
+  document.getElementById('progressText').textContent =
+    `Week ${activeWeek} progress: ${p.done} of ${p.total} tasks (${p.pct}%)`;
+  document.getElementById('progressFill').style.width = p.pct + '%';
+  const m = monthProgress();
+  document.getElementById('monthTotal').textContent =
+    `Month total: ${m.done} of ${m.total} (${m.pct}%)`;
+}
+function renderTask(id, label, isDeep) {
+  const wrapper = document.createElement('label');
+  wrapper.className = 'task';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.checked = !!state.checked[id];
+  cb.addEventListener('change', () => {
+    state.checked[id] = cb.checked;
+    if (!cb.checked) delete state.checked[id];
+    saveState();
+    renderProgressBar();
+    renderTabs();
+  });
+  const span = document.createElement('span');
+  span.className = 'label';
+  span.textContent = label;
+  wrapper.appendChild(cb);
+  wrapper.appendChild(span);
+  return wrapper;
+}
+function renderWeekContent() {
+  const container = document.getElementById('weekContent');
+  container.innerHTML = '';
+  DAY_ORDER.forEach(day => {
+    const dayData = DAILY_TASKS[day];
+    const deep = DEEP_CLEANS[activeWeek] && DEEP_CLEANS[activeWeek][day];
+    const card = document.createElement('div');
+    card.className = 'day-card';
+    const header = document.createElement('div');
+    header.className = 'day-card-header';
+    header.innerHTML = `<div class="day-name">${dayData.name}</div><div class="day-time">${dayData.time}</div>`;
+    card.appendChild(header);
+    dayData.sections.forEach((section, sIdx) => {
+      const sec = document.createElement('div');
+      sec.className = 'section';
+      const title = document.createElement('div');
+      title.className = 'section-title';
+      title.textContent = section.name;
+      sec.appendChild(title);
+      section.tasks.forEach((task, tIdx) => {
+        sec.appendChild(renderTask(taskId(activeWeek, day, sIdx, tIdx), task, false));
+      });
+      card.appendChild(sec);
+    });
+    if (deep) {
+      const ds = document.createElement('div');
+      ds.className = 'deep-section';
+      const tag = document.createElement('span');
+      tag.className = 'deep-tag';
+      tag.textContent = deep.name;
+      ds.appendChild(tag);
+      deep.tasks.forEach((task, tIdx) => {
+        ds.appendChild(renderTask(deepTaskId(activeWeek, day, tIdx), task, true));
+      });
+      card.appendChild(ds);
+    }
+    container.appendChild(card);
+  });
+}
+function renderAll() {
+  renderTabs();
+  renderProgressBar();
+  renderWeekContent();
+}
+loadState();
+document.getElementById('monthInput').value = state.monthYear;
+document.getElementById('monthInput').addEventListener('input', (e) => {
+  state.monthYear = e.target.value;
+  saveState();
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.getElementById('resetConfirm').classList.add('active');
+});
+document.getElementById('confirmReset').addEventListener('click', () => {
+  state.checked = {};
+  saveState();
+  document.getElementById('resetConfirm').classList.remove('active');
+  renderAll();
+});
+document.getElementById('cancelReset').addEventListener('click', () => {
+  document.getElementById('resetConfirm').classList.remove('active');
+});
+renderAll();
+</script>
+</body>
+</html>
